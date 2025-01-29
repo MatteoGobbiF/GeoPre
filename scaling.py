@@ -12,7 +12,7 @@ data=gpd.read_file("input.geojson")
 
 scaled_data = (data - np.mean(data)) / np.std(data)
 
-
+#function to reproject crs
 def reproject_data(data, target_crs):
     """
     Reproject geospatial data to a target CRS if not already in it.
@@ -80,3 +80,65 @@ def reproject_data(data, target_crs):
     else:
         raise TypeError("Unsupported data type. Use GeoDataFrame or rasterio DatasetReader.")
 
+
+
+#function to compare crs of vector and raster data
+def compare_crs(raster_obj, vector_gdf):
+    """
+    Compare the CRS of pre-loaded raster and vector data.
+
+    Parameters:
+    raster_obj (rasterio.DatasetReader): Loaded raster object from rasterio.
+    vector_gdf (geopandas.GeoDataFrame): Loaded vector data from geopandas.
+
+    Returns:
+    dict: Contains CRS info for raster/vector and a boolean indicating if they match.
+    """
+    result = {
+        "raster_crs": None,
+        "vector_crs": None,
+        "same_crs": False,
+        "error": None
+    }
+
+    # Get raster CRS
+    try:
+        raster_crs = raster_obj.crs
+        if raster_crs is not None:
+            # Convert rasterio CRS to pyproj.CRS for comparison
+            raster_crs = CRS.from_wkt(raster_obj.crs.wkt)
+    except Exception as e:
+        result["error"] = f"Raster CRS error: {e}"
+        return result
+
+    # Get vector CRS
+    try:
+        vector_crs = vector_gdf.crs
+    except Exception as e:
+        result["error"] = f"Vector CRS error: {e}"
+        return result
+
+    # Generate user-friendly CRS representations
+    def _format_crs(crs):
+        if crs is None:
+            return "No CRS defined"
+        try:
+            return f"EPSG:{crs.to_epsg()}" if crs.to_epsg() else crs.to_wkt()
+        except Exception:
+            return str(crs)
+
+    result["raster_crs"] = _format_crs(raster_crs)
+    result["vector_crs"] = _format_crs(vector_crs)
+
+    # Compare CRS
+    try:
+        if raster_crs is None and vector_crs is None:
+            result["same_crs"] = True
+        elif raster_crs is None or vector_crs is None:
+            result["same_crs"] = False
+        else:
+            result["same_crs"] = raster_crs.equals(vector_crs)
+    except Exception as e:
+        result["error"] = f"Comparison error: {e}"
+
+    return result
