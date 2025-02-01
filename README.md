@@ -10,6 +10,19 @@ This Python library provides utility functions for preprocessing geospatial data
 - **Compare CRS**: Checks if raster and vector data share the same CRS.
 - **Reproject Data**: Converts raster or vector data to a specified CRS.
 - **Mask No-Data Values**: Identifies and masks undefined pixel values in raster data.
+- 
+- **Data Normalization**
+  - Z-Score Scaling: Standardizes raster data by centering around zero and scaling by standard deviation.
+  - Min-Max Scaling: Scales pixel values to a fixed range (e.g., [0, 1] or [-1, 1]).
+- **CRS Management**
+  - Retrieve CRS: Extracts the coordinate reference system from vector and raster data.
+  - Compare CRS: Checks if raster and vector data share the same CRS.
+- **Reprojection**
+  - Vector data reprojection (GeoPandas)
+  - Raster reprojection (Rasterio/rioxarray)
+- **Data Masking**
+  - No-data value handling
+  - Cross-format support (numpy/xarray)
 
 ## Installation
 Ensure you have the required dependencies installed before using this library:
