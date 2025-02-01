@@ -7,11 +7,25 @@ import rioxarray as rxr
 import xarray as xr
 
 #Standardization (Z-Score Scaling)
-#Usage: Useful for machine learning models sensitive to outliers.
-#Example: Standardize a band of pixel values for clustering/classification.
-def scaled_data(data):
+"""
+This method centers the data around zero by subtracting the mean and dividing by the standard deviation.
+Usage: Useful for machine learning models sensitive to outliers.
+Example: Standardize a band of pixel values for clustering/classification.
+"""
+def Z_score_scaling(data):
     scaled_data = (data - np.mean(data)) / np.std(data)
     return scaled_data
+
+#Min_Max_Scaling
+"""
+This method scales the pixel values to a fixed range, typically [0, 1] or [-1, 1].
+Usage: Ideal when you want to preserve the relative range of values.
+Example:For GeoTIFF image values (e.g., 0 to 65535), scale them to [0, 1].
+"""
+def Min_Max_Scaling(data):
+    scaled_data = (data - np.min(data)) / (np.max(data) - np.min(data))
+    return scaled_data
+
 
 
 #function to get crs of data
@@ -283,7 +297,9 @@ print("valid_samples:",valid_samples)
 
 
 
-#scaling
-raster=scaled_data(raster)
+#z_ score scaling
+raster=Z_score_scaling(raster)
 
 
+#min_max scaling
+raster=Min_Max_Scaling(raster)
