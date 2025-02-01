@@ -98,7 +98,7 @@ masked_da = mask_raster_data(da)
    git push origin feature/your-feature
 
 5. **Open a Pull Request**
-    Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
+   Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
 
 ## License
 This project is licensed under the MIT License. See LICENSE for more information.
