@@ -24,7 +24,7 @@ pip install numpy geopandas rasterio rioxarray xarray pyproj
 ```
 
 ## Usage
-### 1. Scaling Raster Data
+### 1. Data Scaling
 ```python
 import numpy as np
 from scaling_and_reproject import Z_score_scaling, Min_Max_Scaling
@@ -34,34 +34,51 @@ z_scaled = Z_score_scaling(data)
 minmax_scaled = Min_Max_Scaling(data)
 ```
 
-### 2. Getting and Comparing CRS
+### 2. CRS Management
 ```python
 import geopandas as gpd
+import rasterio
 from scaling_and_reproject import get_crs, compare_crs
 
-vector_data = gpd.read_file("vector.shp")
-raster_data = rasterio.open("raster.tif")
+vector = gpd.read_file("data.shp")
+raster = rasterio.open("image.tif")
 
-vector_crs = get_crs(vector_data)
-raster_crs = get_crs(raster_data)
-comparison = compare_crs(raster_data, vector_data)
+print(get_crs(vector))  # EPSG:4326
+print(compare_crs(raster, vector))  # CRS comparison results
 ```
 
-### 3. Reprojecting Data
+### 3. Reprojection
 ```python
+import rasterio
+import xarray as xr
 from scaling_and_reproject import reproject_data
 
-target_crs = "EPSG:4326"
-reprojected_vector = reproject_data(vector_data, target_crs)
+# Vector reprojection
+reprojected_vector = reproject_data(vector, "EPSG:3857")
+
+# Raster reprojection (Rasterio)
+with rasterio.open("input.tif") as src:
+    array, metadata = reproject_data(src, "EPSG:32633")
+
+# Xarray reprojection
+da = xr.open_rasterio("image.tif")
+reprojected_da = reproject_data(da, "EPSG:4326")
 ```
 
-### 4. Masking No-Data Values
+### 4. Data Masking
 ```python
-import rioxarray as rxr
+import xarray as xr
+import rasterio
 from scaling_and_reproject import mask_raster_data
 
-raster = rxr.open_rasterio("raster.tif")
-masked_raster = mask_raster_data(raster)
+# Rasterio workflow
+with rasterio.open("data.tif") as src:
+    data = src.read(1)
+    masked, profile = mask_raster_data(data, src.profile)
+
+# rioxarray workflow
+da = xr.open_rasterio("data.tif")
+masked_da = mask_raster_data(da)
 ```
 
 ## License
