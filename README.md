@@ -3,14 +3,7 @@
 ## Overview
 This Python library provides utility functions for preprocessing geospatial data, including scaling raster values, handling coordinate reference systems (CRS), reprojecting geospatial data, and masking no-data values. It is designed to facilitate geospatial analysis and machine learning applications that work with raster and vector data.
 
-## Features
-- **Z-Score Scaling**: Standardizes raster data by centering around zero and scaling by standard deviation.
-- **Min-Max Scaling**: Scales pixel values to a fixed range (e.g., [0, 1] or [-1, 1]).
-- **Retrieve CRS**: Extracts the coordinate reference system from vector and raster data.
-- **Compare CRS**: Checks if raster and vector data share the same CRS.
-- **Reproject Data**: Converts raster or vector data to a specified CRS.
-- **Mask No-Data Values**: Identifies and masks undefined pixel values in raster data.
-- 
+## Features 
 - **Data Normalization**
   - Z-Score Scaling: Standardizes raster data by centering around zero and scaling by standard deviation.
   - Min-Max Scaling: Scales pixel values to a fixed range (e.g., [0, 1] or [-1, 1]).
