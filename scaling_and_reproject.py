@@ -46,7 +46,10 @@ def get_crs(data):
     """
     # Check for vector data (GeoDataFrame)
     if isinstance(data, gpd.GeoDataFrame):
-        return data.crs
+        if data.crs:
+            return data.crs
+        else:
+            return None
     
     # Check for rasterio Dataset (raster data)
     elif isinstance(data, rasterio.io.DatasetReader):
@@ -122,9 +125,6 @@ def compare_crs(raster_obj, vector_gdf):
 
 #function to reproject data
 def reproject_data(data, target_crs):
-    """
-    Modern CRS handling without PROJ4 strings
-    """
     # Convert input to CRS object using pyproj's auto-detection
     target_crs = CRS.from_user_input(target_crs)
     
@@ -224,82 +224,4 @@ def mask_raster_data(data, profile=None, no_data_value=None, return_mask=False):
 
 
 
-#example usage
-# Load vector data
-vector = gpd.read_file("/mnt/CA6A062B6A06153B/study/Geospatial processing/test/Municipalities_on_lakes.shp")
-# Open raster
-raster = rxr.open_rasterio("/mnt/CA6A062B6A06153B/study/Geospatial processing/test/l8monzaali.tif")# ,masked=True)
 
-#get crs
-raster_crs=get_crs(raster)
-vector_crs=get_crs(vector)
-print(raster_crs)
-print(vector_crs)
-
-#compare crs
-result = compare_crs(raster, vector)
-print(result)
-
-# Reproject
-reprojected_vector = reproject_data(vector, "EPSG:4326")
-reprojected_raster = reproject_data(raster, "EPSG:3857")
-
-# Save output (maintains all geospatial information)
-reprojected_raster.rio.to_raster("/mnt/CA6A062B6A06153B/study/Geospatial processing/test/output.tif")
-
-print(get_crs(reprojected_raster))
-print(get_crs(reprojected_vector))
-
-
-
-
-#mask no value data
-#for raster loded by rioxarray
-data = rxr.open_rasterio("/mnt/CA6A062B6A06153B/study/Geospatial processing/test/output.tif")
-masked_data, mask = mask_raster_data(data, return_mask=True)
-print("masked_data:",masked_data)
-print("mask:",mask)
-
-"""
-#Undefined No-Data: If the raster lacks nodata metadata, specify it manually:
-# Specify a no-data value explicitly (e.g., -9999)
-no_data_value = -9999
-masked_data, mask = mask_raster_data(data, no_data_value=no_data_value, return_mask=True)
-"""
-
-#Multi-Band Masks: To mask pixels where any band has no-data:
-combined_mask = mask.all(dim="band")  # Mask where all bands are valid
-masked_data = data.where(combined_mask)
-# Flatten the data for scikit-learn
-valid_data = masked_data.stack(samples=("y", "x")).dropna(dim="samples")
-print("valid_data:",valid_data)
-
-#for raster loaded by rasterio
-with rasterio.open("/mnt/CA6A062B6A06153B/study/Geospatial processing/test/output.tif") as src:
-    data = src.read()
-    profile = src.profile
-masked_data, mask, profile = mask_raster_data(data, profile=profile, return_mask=True)
-print("maksed_data:",masked_data)
-print("mask:",mask)
-"""
-#If the raster lacks nodata metadata,specify a no-data value explicitly (e.g., -9999)
-no_data_value = -9999
-# Mask the raster data
-masked_data, mask, profile = mask_raster_data(data, no_data_value=no_data_value, return_mask=True)
-"""
-# Create a combined mask for all bands (valid if all bands are valid)
-multi_band_mask = np.all(mask, axis=0)  # Shape: [height, width]
-masked_data = ma.masked_array(data, mask=np.broadcast_to(~mask, data.shape))
-
-# For classification, extract valid pixels (across all bands)
-valid_samples = masked_data.compressed()  # Flattened array of valid values
-print("valid_samples:",valid_samples)
-
-
-
-#z_ score scaling
-raster=Z_score_scaling(raster)
-
-
-#min_max scaling
-raster=Min_Max_Scaling(raster)
