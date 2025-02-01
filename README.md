@@ -81,19 +81,24 @@ da = xr.open_rasterio("data.tif")
 masked_da = mask_raster_data(da)
 ```
 ## Contributing
+
 1. **Fork the repository**  
    Click the "Fork" button at the top-right of this repository to create your copy.
+   
 2. **Create your feature branch**  
    ```bash
    git checkout -b feature/your-feature
+   
 3. **Commit changes**
    ```bash
-   git commit -am 'Add some feature'  
-4.**Push to branch**
-  ```bash
-  git push origin feature/your-feature
-5.**Open a Pull Request**
-  Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
+   git commit -am 'Add some feature'
+   
+4. **Push to branch**
+   ```bash
+   git push origin feature/your-feature
+
+5. **Open a Pull Request**
+   Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
 
 ## License
 This project is licensed under the MIT License. See LICENSE for more information.
