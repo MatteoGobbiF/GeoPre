@@ -1,11 +1,24 @@
 import numpy as np
-import numpy.ma as ma
 import geopandas as gpd
 import rasterio
+from rasterio.warp import reproject, Resampling, calculate_default_transform
 from pyproj import CRS
-import rioxarray as rxr
 import xarray as xr
+"""
+Geospatial data processing utilities for scaling, CRS handling, reprojection, and masking.
 
+This module provides functions to handle common geospatial data operations:
+- Normalization/scaling of raster data
+- CRS management for vector and raster datasets
+- Coordinate system reprojection
+- No-data value masking
+
+Functions handle multiple geospatial data types including:
+- NumPy arrays
+- GeoPandas GeoDataFrames
+- Rasterio DatasetReaders
+- Xarray DataArrays (rioxarray)
+"""
 #Standardization (Z-Score Scaling)
 """
 This method centers the data around zero by subtracting the mean and dividing by the standard deviation.
@@ -31,18 +44,21 @@ def Min_Max_Scaling(data):
 #function to get crs of data
 def get_crs(data):
     """
-    Retrieve the Coordinate Reference System (CRS) from an in-memory geospatial object (vector or raster).
-
-    Parameters:
-    data: Input geospatial data. Supported types:
-        - Vector: `geopandas.GeoDataFrame`
-        - Raster: `rasterio.io.DatasetReader` (opened raster dataset) or `xarray.DataArray` (with `rio` accessor).
-
+    Retrieve CRS from geospatial data objects.
+    
+    Handles:
+    - GeoPandas GeoDataFrames (vector)
+    - Rasterio DatasetReaders (raster)
+    - Xarray DataArrays with rio accessor (raster)
+    
+    Args:
+        data: Geospatial data object
+        
     Returns:
-    pyproj.CRS: The CRS of the geospatial data. Returns `None` if the CRS is not defined.
-
+        pyproj.CRS: Coordinate reference system or None if undefined
+        
     Raises:
-    ValueError: If the input data type is unsupported.
+        ValueError: For unsupported input types
     """
     # Check for vector data (GeoDataFrame)
     if isinstance(data, gpd.GeoDataFrame):
@@ -72,7 +88,22 @@ def get_crs(data):
 #function to compare crs of vector and raster data
 def compare_crs(raster_obj, vector_gdf):
     """
-    Compare CRS of raster (xarray.DataArray or rasterio) and vector (geopandas) data.
+    Compare CRS between raster and vector datasets.
+    
+    Args:
+        raster_obj (DatasetReader/xarray.DataArray): Raster data source
+        vector_gdf (gpd.GeoDataFrame): Vector data source
+        
+    Returns:
+        dict: Comparison results with keys:
+            - raster_crs: Formatted CRS string
+            - vector_crs: Formatted CRS string  
+            - same_crs: Boolean comparison result
+            - error: Exception message if any
+            
+    Example:
+        >>> compare_crs(raster, gdf)["same_crs"]
+        True
     """
     result = {
         "raster_crs": None,
@@ -86,12 +117,12 @@ def compare_crs(raster_obj, vector_gdf):
         if hasattr(raster_obj, 'rio'):  # rioxarray DataArray
             raster_crs = raster_obj.rio.crs
         elif hasattr(raster_obj, 'crs'):  # rasterio DatasetReader
-            raster_crs = CRS.from_wkt(raster_obj.crs.wkt)
+            raster_crs = get_crs(raster_obj)  # Use get_crs for raster as well
         else:
             raise AttributeError("Unsupported raster type - use rioxarray.DataArray or rasterio.DatasetReader")
             
-        # Handle vector data
-        vector_crs = vector_gdf.crs
+        # Handle vector data: Use get_crs to ensure correct retrieval
+        vector_crs = get_crs(vector_gdf)
 
     except Exception as e:
         result["error"] = str(e)
@@ -100,7 +131,7 @@ def compare_crs(raster_obj, vector_gdf):
     # Format CRS information
     def _format_crs(crs):
         if crs is None:
-            return "No CRS defined"
+            return None
         try:
             return f"EPSG:{crs.to_epsg()}" if crs.to_epsg() else crs.to_wkt()
         except Exception:
@@ -116,7 +147,7 @@ def compare_crs(raster_obj, vector_gdf):
         elif raster_crs is None or vector_crs is None:
             result["same_crs"] = False
         else:
-            result["same_crs"] = (raster_crs==vector_crs)
+            result["same_crs"] = (raster_crs == vector_crs)
     except Exception as e:
         result["error"] = str(e)
 
@@ -125,51 +156,102 @@ def compare_crs(raster_obj, vector_gdf):
 
 #function to reproject data
 def reproject_data(data, target_crs):
-    # Convert input to CRS object using pyproj's auto-detection
+    """
+    Reproject geospatial data to target CRS.
+    
+    Supported inputs:
+    - GeoDataFrames (vector reprojection)
+    - Rasterio datasets (returns array + metadata)
+    - Xarray objects (rioxarray reprojection)
+    
+    Args:
+        data: Geospatial data object
+        target_crs: CRS to reproject to (EPSG code/WKT/proj4 string)
+        
+    Returns:
+        Reprojected data in format matching input type
+        
+    Raises:
+        ValueError: If input lacks CRS definition
+        TypeError: For unsupported input types
+    """
     target_crs = CRS.from_user_input(target_crs)
     
     # Vector Data (GeoPandas)
     if isinstance(data, gpd.GeoDataFrame):
         if data.crs is None:
             raise ValueError("Vector data has no CRS. Cannot reproject.")
-        
-        # Compare CRS objects directly
-        if data.crs == target_crs:
+        if CRS(data.crs) == target_crs:
             return data
-            
-        # Use CRS object directly
         return data.to_crs(target_crs)
     
-    # Raster Data (xarray with rioxarray)
+    # Rasterio DatasetReader
+    elif isinstance(data, rasterio.io.DatasetReader):
+        src = data
+        if src.crs is None:
+            raise ValueError("Raster data has no CRS. Cannot reproject.")
+        
+        if CRS(src.crs) == target_crs:
+            return src
+        
+        # Rasterio reprojection logic
+        transform, width, height = calculate_default_transform(
+            src.crs, target_crs, src.width, src.height, *src.bounds
+        )
+        
+        dst_array = np.zeros((src.count, height, width), dtype=src.dtypes[0])
+        reproject(
+            source=rasterio.band(src, range(1, src.count + 1)),
+            destination=dst_array,
+            src_transform=src.transform,
+            src_crs=src.crs,
+            dst_transform=transform,
+            dst_crs=target_crs,
+            resampling=Resampling.nearest
+        )
+        
+        # Return reprojected array and new metadata
+        return dst_array, {
+            'driver': 'GTiff',
+            'dtype': dst_array.dtype,
+            'count': dst_array.shape[0],
+            'width': width,
+            'height': height,
+            'transform': transform,
+            'crs': target_crs
+        }
+    
+    # rioxarray/xarray objects
     elif isinstance(data, (xr.DataArray, xr.Dataset)):
         if not data.rio.crs:
-            raise ValueError("Raster data has no CRS. Cannot reproject.")
-            
-        # Compare using pyproj.CRS objects
+            raise ValueError("Raster data has no CRS")
         if CRS(data.rio.crs) == target_crs:
             return data
-            
-        # Reproject 
         return data.rio.reproject(target_crs.to_wkt())
     
     else:
-        raise TypeError("Supported types: GeoDataFrame, xarray DataArray/Dataset")
+        raise TypeError("Unsupported input type. Use: GeoDataFrame, xarray object, or rasterio DatasetReader")
 
 #function to mask no value data
 def mask_raster_data(data, profile=None, no_data_value=None, return_mask=False):
     """
-    Mask no-data values in raster data loaded with `rasterio` or `rioxarray`.
+    Mask no-data values in raster datasets.
+    
+    Handles both rasterio (numpy) and rioxarray (xarray) workflows.
     
     Args:
-        data (numpy.ndarray or xarray.DataArray): Raster data.
-        profile (dict, optional): Raster metadata from `rasterio` (used if `data` is a NumPy array).
-        no_data_value (int/float, optional): Explicit no-data value (overrides metadata).
-        return_mask (bool): If True, returns the boolean mask. Default: False.
+        data: Raster data (numpy.ndarray or xarray.DataArray)
+        profile: Rasterio metadata dict (required for numpy arrays)
+        no_data_value: Override for metadata's nodata value
+        return_mask: Whether to return boolean mask
         
     Returns:
-        masked_data: Masked array (NumPy `MaskedArray` or `xarray.DataArray`) with no-data values masked.
-        mask (optional): Boolean mask (True = valid data). Returned if `return_mask=True`.
-        profile (optional): Original metadata (if provided and input is a NumPy array).
+        Masked data array. For numpy inputs, returns tuple:
+        (masked_array, profile). For xarray, returns DataArray.
+        
+    Raises:
+        ValueError: If nodata value cannot be determined
+        TypeError: For unsupported input types
     """
     # Handle xarray.DataArray (rioxarray)
     if isinstance(data, xr.DataArray):
@@ -191,7 +273,7 @@ def mask_raster_data(data, profile=None, no_data_value=None, return_mask=False):
             return masked_data, mask
         else:
             return masked_data
-    
+
     # Handle NumPy array (rasterio)
     elif isinstance(data, np.ndarray):
         # Determine no-data value
@@ -200,6 +282,10 @@ def mask_raster_data(data, profile=None, no_data_value=None, return_mask=False):
                 no_data_value = profile.get('nodata')
             else:
                 raise ValueError("Specify `no_data_value` or provide a `profile` with `nodata`.")
+        
+        # Check if no_data_value is still None after retrieval
+        if no_data_value is None:
+            raise ValueError("Specify `no_data_value` or provide a `profile` with `nodata`.")
         
         # Handle NaN values (common in float rasters)
         if np.isnan(no_data_value):
@@ -217,11 +303,3 @@ def mask_raster_data(data, profile=None, no_data_value=None, return_mask=False):
     
     else:
         raise TypeError("Unsupported data type. Input must be `numpy.ndarray` or `xarray.DataArray`.")
-
-
-
-
-
-
-
-
