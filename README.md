@@ -46,9 +46,9 @@ Ideal for researchers and developers working with geospatial data, **GeoPre** en
 
 
 ## Installation
-Ensure you have the required dependencies installed before using this library:
+Install the package by running the following command:
 ```bash
-pip install numpy geopandas rasterio rioxarray xarray pyproj
+pip install geopre
 ```
 
 ## Usage
@@ -76,11 +76,11 @@ For GeoTIFF image values (e.g., 0 to 65535), scale them to [0, 1].
 #### Example:
 ```python
 import numpy as np
-from scaling_and_reproject import Z_score_scaling, Min_Max_Scaling
+import geopre as gp
 
 data = np.array([[10, 20, 30], [40, 50, 60]])
-z_scaled = Z_score_scaling(data)
-minmax_scaled = Min_Max_Scaling(data)
+z_scaled = gp.Z_score_scaling(data)
+minmax_scaled = gp.Min_Max_Scaling(data)
 ```
 
 ### 2. CRS Management
@@ -113,13 +113,13 @@ minmax_scaled = Min_Max_Scaling(data)
 ```python
 import geopandas as gpd
 import rasterio
-from scaling_and_reproject import get_crs, compare_crs
+import geopre as gp
 
 vector = gpd.read_file("data.shp")
 raster = rasterio.open("image.tif")
 
-print(get_crs(vector))  # EPSG:4326
-print(compare_crs(raster, vector))  # CRS comparison results
+print(gp.get_crs(vector))  # EPSG:4326
+print(gp.compare_crs(raster, vector))  # CRS comparison results
 ```
 
 ### 3. Reprojection
@@ -137,18 +137,18 @@ print(compare_crs(raster, vector))  # CRS comparison results
 ```python
 import rasterio
 import xarray as xr
-from scaling_and_reproject import reproject_data
+import geopre as gp
 
 # Vector reprojection
-reprojected_vector = reproject_data(vector, "EPSG:3857")
+reprojected_vector = gp.reproject_data(vector, "EPSG:3857")
 
 # Raster reprojection (Rasterio)
 with rasterio.open("input.tif") as src:
-    array, metadata = reproject_data(src, "EPSG:32633")
+    array, metadata = gp.reproject_data(src, "EPSG:32633")
 
 # Xarray reprojection
 da = xr.open_rasterio("image.tif")
-reprojected_da = reproject_data(da, "EPSG:4326")
+reprojected_da = gp.reproject_data(da, "EPSG:4326")
 ```
 
 ### 4. No-Data Masking
@@ -168,16 +168,16 @@ reprojected_da = reproject_data(da, "EPSG:4326")
 ```python
 import xarray as xr
 import rasterio
-from scaling_and_reproject import mask_raster_data
+import geopre as gp
 
 # Rasterio workflow
 with rasterio.open("data.tif") as src:
     data = src.read(1)
-    masked, profile = mask_raster_data(data, src.profile)
+    masked, profile = gp.mask_raster_data(data, src.profile)
 
 # rioxarray workflow
 da = xr.open_rasterio("data.tif")
-masked_da = mask_raster_data(da)
+masked_da = gp.mask_raster_data(da)
 ```
 
 ### 5. Cloud Masking
@@ -210,9 +210,9 @@ masked_da = mask_raster_data(da)
 
 #### Example:
 ```python
-from cloud_masking import mask_clouds_S2
+import geopre as gp
 
-output_s2 = mask_clouds_S2("sentinel2_image.tif", method='auto', mask_shadows=True)
+output_s2 = gp.mask_clouds_S2("sentinel2_image.tif", method='auto', mask_shadows=True)
 ```
 
 #### `mask_clouds_landsat`
@@ -242,9 +242,9 @@ Masks clouds and optionally shadows in a Landsat raster image using various meth
 ### Example
 
 ```python
-from cloud_masking import mask_clouds_landsat
+import geopre as gp
 
-output_landsat = mask_clouds_landsat("landsat_image.tif", method='auto', mask_shadows=True)
+output_landsat = gp.mask_clouds_landsat("landsat_image.tif", method='auto', mask_shadows=True)
 ```
 
 ## 6. Band Stacking
@@ -268,9 +268,9 @@ Stacks multiple raster bands from a folder into a single multi-band raster. Supp
 ### Example
 
 ```python
-from stacking import stack_bands
+import geopre as gp
 
-stacked_image = stack_bands("/path/to/folder/containing/bands", ["B4", "B3", "B2"])
+stacked_image = gp.stack_bands("/path/to/folder/containing/bands", ["B4", "B3", "B2"])
 ```
 
 
