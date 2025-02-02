@@ -53,6 +53,26 @@ pip install numpy geopandas rasterio rioxarray xarray pyproj
 
 ## Usage
 ### 1. Data Scaling
+#### `Z-Score Scaling`
+**Description**:This method centers the data around zero by subtracting the mean and dividing by the standard deviation, which is useful for machine learning models sensitive to outliers 
+and can standardize a band of pixel values for clustering/classification.
+**Parameters**:
+**Args**:
+- data (numpy.ndarray): Input array to normalize.
+        
+**Returns**:
+- numpy.ndarray: Standardized data with mean 0 and standard deviation 1.
+
+#### `Min_Max_Scaling`
+**Description**: This method scales the pixel values to a fixed range, typically [0, 1] or [-1, 1]. Ideal when you want to preserve the relative range of values. 
+For GeoTIFF image values (e.g., 0 to 65535), scale them to [0, 1].
+**Parameters**:
+**Args**:
+- data (numpy.ndarray): Input array to normalize
+**Returns**:
+- numpy.ndarray: Scaled data with values between 0 and 1
+      
+#### Example:
 ```python
 import numpy as np
 from scaling_and_reproject import Z_score_scaling, Min_Max_Scaling
@@ -63,6 +83,30 @@ minmax_scaled = Min_Max_Scaling(data)
 ```
 
 ### 2. CRS Management
+
+#### `get_crs`
+**Description**: Retrieve CRS from geospatial data objects.
+**Parameters**:
+**Args**:
+- data: GeoPandas GeoDataFrames (vector), Rasterio DatasetReaders (raster) or Xarray DataArrays with rio accessor (raster)  
+**Returns**:
+-pyproj.CRS: Coordinate reference system or None if undefined
+
+#### `compare_crs`
+**Description**: Compare CRS between raster and vector datasets.
+**Parameters**:
+**Args**:
+- raster_obj (DatasetReader/xarray.DataArray): Raster data source.
+- vector_gdf (gpd.GeoDataFrame): Vector data source.
+ 
+**Returns**:
+**dict**: Comparison results with keys:
+- raster_crs: Formatted CRS string
+- vector_crs: Formatted CRS string  
+- same_crs: Boolean comparison result
+- error: Exception message if any
+
+#### Example:
 ```python
 import geopandas as gpd
 import rasterio
@@ -76,6 +120,15 @@ print(compare_crs(raster, vector))  # CRS comparison results
 ```
 
 ### 3. Reprojection
+#### `reproject_data`
+**Description**: Reproject geospatial data to target CRS.
+**Parameters**:
+**Args**:
+- data: GeoDataFrames (vector reprojection), Rasterio datasets (returns array + metadata) or Xarray objects (rioxarray reprojection) 
+- target_crs: CRS to reproject to (EPSG code/WKT/proj4 string)
+**Returns**:
+-Reprojected data in format matching input type
+#### Example:
 ```python
 import rasterio
 import xarray as xr
@@ -94,6 +147,18 @@ reprojected_da = reproject_data(da, "EPSG:4326")
 ```
 
 ### 4. No-Data Masking
+#### `mask_raster_data`
+**Description**: Mask no-data values in raster datasets. Handles both rasterio (numpy) and rioxarray (xarray) workflows.
+**Parameters**:
+**Args**:
+- data: Raster data (numpy.ndarray or xarray.DataArray)
+- profile: Rasterio metadata dict (required for numpy arrays)
+- no_data_value: Override for metadata's nodata value
+- return_mask: Whether to return boolean mask
+**Returns**:
+- Masked data array. For numpy inputs, returns tuple:(masked_array, profile). For xarray, returns DataArray.
+
+#### Example:
 ```python
 import xarray as xr
 import rasterio
