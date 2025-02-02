@@ -50,6 +50,9 @@ Install the package by running the following command:
 ```bash
 pip install geopre
 ```
+This will automatically install all required dependencies.
+
+
 
 ## Usage
 ### 1. Data Scaling
