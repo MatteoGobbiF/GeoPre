@@ -1,7 +1,6 @@
 # GeoPre: Geospatial Data Processing Toolkit  
 **GeoPre** is a Python library designed to streamline common geospatial data operations, offering a unified interface for handling raster and vector datasets. It simplifies preprocessing tasks essential for GIS analysis, machine learning workflows, and remote sensing applications.
 
----
 
 ### Key Features  
 - **Data Scaling**:  
@@ -20,13 +19,11 @@
   - Handle missing values in raster datasets (NumPy/Xarray) with flexible masking.  
   - Integrates seamlessly with raster metadata for error-free workflows.  
 
----
 
 ### Supported Data Types  
 - **Raster**: NumPy arrays, Rasterio `DatasetReader`, Xarray `DataArray` (via rioxarray).  
 - **Vector**: GeoPandas `GeoDataFrame`.  
 
----
 
 ### Benefits of GeoPre  
 - **Unified Workflow**: Eliminates boilerplate code by providing consistent functions for raster and vector data.  
@@ -35,18 +32,15 @@
 - **Efficiency**: Optimized reprojection and masking operations reduce preprocessing time for large datasets.  
 - **ML-Ready Outputs**: Scaling functions preserve data structure, making outputs directly usable in machine learning pipelines.  
 
----
 
 Ideal for researchers and developers working with geospatial data, **GeoPre** enhances productivity by standardizing preprocessing steps and ensuring compatibility across diverse geospatial tools.
 
----
 
 ## Installation
 Ensure you have the required dependencies installed before using this library:
 ```bash
 pip install numpy geopandas rasterio rioxarray xarray pyproj
 ```
----
 
 ## Usage
 ### 1. Data Scaling
@@ -105,11 +99,11 @@ with rasterio.open("data.tif") as src:
 da = xr.open_rasterio("data.tif")
 masked_da = mask_raster_data(da)
 ```
----
 
 ## Contributing
 
 1. **Fork the repository**  
+   
    Click the "Fork" button at the top-right of this repository to create your copy.
    
 2. **Create your feature branch**  
@@ -125,14 +119,13 @@ masked_da = mask_raster_data(da)
    git push origin feature/your-feature
 
 5. **Open a Pull Request**
+   
    Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
 
----
    
 ## License
 This project is licensed under the MIT License. See LICENSE for more information.
 
----
 
 ## Author
 [Your Name] – [Your Email or GitHub Profile]
