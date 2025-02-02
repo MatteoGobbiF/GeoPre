@@ -1,27 +1,52 @@
-# Scaling and Reprojecting Geospatial Data
+# GeoPre: Geospatial Data Processing Toolkit  
+**GeoPre** is a Python library designed to streamline common geospatial data operations, offering a unified interface for handling raster and vector datasets. It simplifies preprocessing tasks essential for GIS analysis, machine learning workflows, and remote sensing applications.
 
-## Overview
-This Python library provides utility functions for preprocessing geospatial data, including scaling raster values, handling coordinate reference systems (CRS), reprojecting geospatial data, and masking no-data values. It is designed to facilitate geospatial analysis and machine learning applications that work with raster and vector data.
+---
 
-## Features 
-- **Data Normalization**
-  - Z-Score Scaling: Standardizes raster data by centering around zero and scaling by standard deviation.
-  - Min-Max Scaling: Scales pixel values to a fixed range (e.g., [0, 1] or [-1, 1]).
-- **CRS Management**
-  - Retrieve CRS: Extracts the coordinate reference system from vector and raster data.
-  - Compare CRS: Checks if raster and vector data share the same CRS.
-- **Reprojection**
-  - Vector data reprojection (GeoPandas)
-  - Raster reprojection (Rasterio/rioxarray)
-- **Data Masking**
-  - No-data value handling
-  - Cross-format support (numpy/xarray)
+### Key Features  
+- **Data Scaling**:  
+  - Normalization (Z-Score) and Min-Max scaling for raster bands.  
+  - Prepares data for ML models while preserving geospatial metadata.  
+
+- **CRS Management**:  
+  - Retrieve and compare Coordinate Reference Systems (CRS) across raster (Rasterio/Xarray) and vector (GeoPandas) datasets.  
+  - Ensure consistency between datasets with automated CRS checks.  
+
+- **Reprojection**:  
+  - Reproject vector data (GeoDataFrames) and raster data (Rasterio/Xarray) to any target CRS.  
+  - Supports EPSG codes, WKT, and Proj4 strings.  
+
+- **No-Data Masking**:  
+  - Handle missing values in raster datasets (NumPy/Xarray) with flexible masking.  
+  - Integrates seamlessly with raster metadata for error-free workflows.  
+
+---
+
+### Supported Data Types  
+- **Raster**: NumPy arrays, Rasterio `DatasetReader`, Xarray `DataArray` (via rioxarray).  
+- **Vector**: GeoPandas `GeoDataFrame`.  
+
+---
+
+### Benefits of GeoPre  
+- **Unified Workflow**: Eliminates boilerplate code by providing consistent functions for raster and vector data.  
+- **Interoperability**: Bridges gaps between GeoPandas, Rasterio, and Xarray, ensuring smooth data transitions.  
+- **Robust Error Handling**: Automatically detects CRS mismatches and missing metadata to prevent silent failures.  
+- **Efficiency**: Optimized reprojection and masking operations reduce preprocessing time for large datasets.  
+- **ML-Ready Outputs**: Scaling functions preserve data structure, making outputs directly usable in machine learning pipelines.  
+
+---
+
+Ideal for researchers and developers working with geospatial data, **GeoPre** enhances productivity by standardizing preprocessing steps and ensuring compatibility across diverse geospatial tools.
+
+---
 
 ## Installation
 Ensure you have the required dependencies installed before using this library:
 ```bash
 pip install numpy geopandas rasterio rioxarray xarray pyproj
 ```
+---
 
 ## Usage
 ### 1. Data Scaling
@@ -80,6 +105,8 @@ with rasterio.open("data.tif") as src:
 da = xr.open_rasterio("data.tif")
 masked_da = mask_raster_data(da)
 ```
+---
+
 ## Contributing
 
 1. **Fork the repository**  
@@ -99,9 +126,13 @@ masked_da = mask_raster_data(da)
 
 5. **Open a Pull Request**
    Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
+
+---
    
 ## License
 This project is licensed under the MIT License. See LICENSE for more information.
+
+---
 
 ## Author
 [Your Name] – [Your Email or GitHub Profile]

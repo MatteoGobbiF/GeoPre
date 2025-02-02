@@ -1,4 +1,4 @@
-from scaling_and_reproject import Z_score_scaling, Min_Max_Scaling,get_crs, compare_crs, reproject_data,mask_raster_data
+from GeoPre import Z_score_scaling, Min_Max_Scaling,get_crs, compare_crs, reproject_data,mask_raster_data
 import geopandas as gpd
 import rasterio
 from pyproj import CRS
