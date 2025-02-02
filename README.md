@@ -114,12 +114,25 @@ masked_da = mask_raster_data(da)
 **Description**: Masks clouds and optionally shadows in a Sentinel-2 raster image using various methods.
 
 **Parameters**:
-- **image_path** *(str)*: Path to the input raster image.
-- **output_path** *(str, optional)*: Path to save the masked output raster. Defaults to the same directory as the input with '_masked' appended to the filename.
-- **method** *(str, optional)*: The method for masking ('auto', 'qa', 'probability', 'omnicloudmask', 'scl', 'standard'). Defaults to 'auto'.
-- **mask_shadows** *(bool)*: Whether to mask cloud shadows. Defaults to False.
-- **threshold** *(int)*: Cloud probability threshold (if using a cloud probability band), from 0 to 100. Defaults to 20.
-- **nodata_value** *(int)*: Value for no-data regions. Defaults to `np.nan`.
+- `image_path` *(str)*: Path to the input raster image.
+- `output_path` *(str, optional)*: Path to save the masked output raster. Defaults to the same directory as the input with '_masked' appended to the filename.
+- `method` *(str, optional)*: The method for masking. Options are:
+  - `'auto'`: Automatically chooses the best available method.
+  - `'qa'`: Uses the QA60 band to mask clouds. WARNING: QA60 is deprecated after 2022-01-25, results for images after that date could be wrong
+  - `'probability'`: Uses the cloud probability band MSK_CLDPRB with a threshold for masking.
+  - `'omnicloudmask'`: Utilizes OmniCloudMask for AI-based cloud detection. Might take a long time for big images
+  - `'scl'`: Leverages the Scene Classification Layer (SCL) for masking.
+  - `'standard'`: Similar to 'auto', but avoids the OmniCloudMask method.
+- `mask_shadows` *(bool)*: Whether to mask cloud shadows. Defaults to `False`.
+- `threshold` *(int, optional)*: Cloud probability threshold (if using a cloud probability band), from 0 to 100. Defaults to `20`.
+- `qa60_idx` *(int, optional)*: Index of the QA60 band (1-based). Auto-detected if not provided.
+- `qa60_path` *(str, optional)*: Path to the QA60 band (if in a separate file).
+- `prob_band_idx` *(int, optional)*: Index of the cloud probability band (1-based). Auto-detected if not provided.
+- `prob_band_path` *(str, optional)*: Path to the cloud probability band (if in a separate file).
+- `scl_idx` *(int, optional)*: Index of the SCL band (1-based). Auto-detected if not provided.
+- `scl_path` *(str, optional)*: Path to the SCL band (if in a separate file).
+- `red_idx`, `green_idx`, `nir_idx` *(int, optional)*: Indices of the red, green, and NIR bands, respectively. Auto-detected if not provided.
+- `nodata_value` *(float)*: Value for no-data regions. Defaults to `np.nan`.
 
 **Returns**:
 - *(str)*: The path to the saved masked output raster.
@@ -131,45 +144,65 @@ from cloud_masking import mask_clouds_S2
 output_s2 = mask_clouds_S2("sentinel2_image.tif", method='auto', mask_shadows=True)
 ```
 
-#### `mask_clouds_landsat`
-**Description**: Masks clouds and optionally shadows in a Landsat raster image using various methods.
+## mask_clouds_landsat
 
-**Parameters**:
-- **image_path** *(str)*: Path to the input multi-band raster image.
-- **output_path** *(str, optional)*: Path to save the masked output raster. Defaults to the same directory as the input with '_masked' suffix.
-- **method** *(str)*: The method for masking ('auto', 'qa', 'omnicloudmask'). Defaults to 'auto'.
-- **mask_shadows** *(bool)*: Whether to mask cloud shadows. Defaults to False.
-- **nodata_value** *(int)*: Value for no-data regions. Defaults to `np.nan`.
+**Description**:  
+Masks clouds and optionally shadows in a Landsat raster image using various methods.
 
-**Returns**:
-- *(str)*: The path to the saved masked output raster.
+### Parameters
 
-#### Example:
+- **`image_path`** *(str)*: Path to the input multi-band raster image.  
+- **`output_path`** *(str, optional)*: Path to save the masked output raster. Defaults to the same directory as the input with `_masked` suffix.  
+- **`method`** *(str)*: The method for masking. Options are:  
+  - **`'auto'`**: Automatically chooses the best available method.  
+  - **`'qa'`**: Uses the QA_PIXEL band to mask clouds.  
+  - **`'omnicloudmask'`**: Utilizes OmniCloudMask for AI-based cloud detection.  
+- **`mask_shadows`** *(bool)*: Whether to mask cloud shadows. Defaults to `False`.  
+- **`qa_pixel_path`** *(str, optional)*: Path to the separate QA_PIXEL raster file.  
+- **`qa_pixel_idx`** *(int, optional)*: Index of the QA_PIXEL band (1-based).  
+- **`confidence_threshold`** *(str, optional)*: Confidence threshold for cloud masking (e.g., `'Low'`, `'Medium'`, `'High'`). Defaults to `'High'`. WARNING: as per the Landsat official documentation, the confidence bands are still under development, always use the default 'High' untill further notice. [Source]([myLib/README.md](https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat8-9-Collection2-Level2-Science-Product-Guide-v6.pdf))
+- **`red_idx`**, **`green_idx`**, **`nir_idx`** *(int, optional)*: Indices of the red, green, and NIR bands, respectively. Auto-detected if not provided.  
+- **`nodata_value`** *(float)*: Value for no-data regions. Defaults to `np.nan`.  
+
+### Returns
+
+- *(str)*: The path to the saved masked output raster.  
+
+### Example
+
 ```python
 from cloud_masking import mask_clouds_landsat
 
 output_landsat = mask_clouds_landsat("landsat_image.tif", method='auto', mask_shadows=True)
 ```
 
-### 6. Band Stacking
-#### `stack_bands`
-**Description**: Stacks multiple raster bands from a folder into a single multi-band raster.
+## 6. Band Stacking
 
-**Parameters**:
-- **input_path** *(str or Path)*: Path to the folder containing band files.
-- **required_bands** *(list of str)*: List of band name identifiers (e.g., ["B4", "B3", "B2"]).
-- **output_path** *(str or Path, optional)*: Path to save the stacked raster. Defaults to "stacked.tif" in the input folder.
-- **resolution** *(float, optional)*: Target resolution for resampling. Defaults to the highest available resolution.
+### `stack_bands`
 
-**Returns**:
-- *(str)*: The path to the saved stacked output raster.
+**Description**:  
+Stacks multiple raster bands from a folder into a single multi-band raster. Support also .SAFE folders.
 
-#### Example:
+### Parameters
+
+- **`input_path`** *(str or Path)*: Path to the folder containing band files.  
+- **`required_bands`** *(list of str)*: List of band name identifiers (e.g., `["B4", "B3", "B2"]`).  
+- **`output_path`** *(str or Path, optional)*: Path to save the stacked raster. Defaults to `"stacked.tif"` in the input folder.  
+- **`resolution`** *(float, optional)*: Target resolution for resampling. Defaults to the highest available resolution.  
+
+### Returns
+
+- *(str)*: The path to the saved stacked output raster.  
+
+### Example
+
 ```python
 from stacking import stack_bands
 
 stacked_image = stack_bands("/path/to/folder/containing/bands", ["B4", "B3", "B2"])
-```
+
+
+
 
 ## Contributing
 
