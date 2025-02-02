@@ -231,7 +231,7 @@ Masks clouds and optionally shadows in a Landsat raster image using various meth
 - **`mask_shadows`** *(bool)*: Whether to mask cloud shadows. Defaults to `False`.  
 - **`qa_pixel_path`** *(str, optional)*: Path to the separate QA_PIXEL raster file.  
 - **`qa_pixel_idx`** *(int, optional)*: Index of the QA_PIXEL band (1-based).  
-- **`confidence_threshold`** *(str, optional)*: Confidence threshold for cloud masking (e.g., `'Low'`, `'Medium'`, `'High'`). Defaults to `'High'`. WARNING: as per the Landsat official documentation, the confidence bands are still under development, always use the default 'High' untill further notice. [Source]([myLib/README.md](https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat8-9-Collection2-Level2-Science-Product-Guide-v6.pdf))
+- **`confidence_threshold`** *(str, optional)*: Confidence threshold for cloud masking (e.g., `'Low'`, `'Medium'`, `'High'`). Defaults to `'High'`. WARNING: as per the Landsat official documentation, the confidence bands are still under development, always use the default 'High' untill further notice. [Source](https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat8-9-Collection2-Level2-Science-Product-Guide-v6.pdf)
 - **`red_idx`**, **`green_idx`**, **`nir_idx`** *(int, optional)*: Indices of the red, green, and NIR bands, respectively. Auto-detected if not provided.  
 - **`nodata_value`** *(float)*: Value for no-data regions. Defaults to `np.nan`.  
 
