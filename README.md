@@ -200,8 +200,7 @@ Stacks multiple raster bands from a folder into a single multi-band raster. Supp
 from stacking import stack_bands
 
 stacked_image = stack_bands("/path/to/folder/containing/bands", ["B4", "B3", "B2"])
-
-
+```
 
 
 ## Contributing
