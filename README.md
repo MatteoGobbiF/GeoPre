@@ -272,7 +272,12 @@ import geopre as gp
 
 stacked_image = gp.stack_bands("/path/to/folder/containing/bands", ["B4", "B3", "B2"])
 ```
+## Examples
 
+We provide two example Jupyter notebooks demonstrating the usage of **GeoPre**:
+
+- **[example_usage.ipynb](example_usage.ipynb)** – Demonstrates **scaling, reprojecting, and masking operations**.
+- **[example_usage_2.ipynb](example_usage_2.ipynb)** – Covers **cloud masking and band stacking**.
 
 ## Contributing
 
