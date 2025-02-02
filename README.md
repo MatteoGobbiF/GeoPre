@@ -144,12 +144,12 @@ from cloud_masking import mask_clouds_S2
 output_s2 = mask_clouds_S2("sentinel2_image.tif", method='auto', mask_shadows=True)
 ```
 
-#### mask_clouds_landsat
+#### `mask_clouds_landsat`
 
 **Description**:  
 Masks clouds and optionally shadows in a Landsat raster image using various methods.
 
-### Parameters
+**Parameters**:
 
 - **`image_path`** *(str)*: Path to the input multi-band raster image.  
 - **`output_path`** *(str, optional)*: Path to save the masked output raster. Defaults to the same directory as the input with `_masked` suffix.  
