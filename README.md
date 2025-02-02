@@ -93,7 +93,7 @@ da = xr.open_rasterio("image.tif")
 reprojected_da = reproject_data(da, "EPSG:4326")
 ```
 
-### 4. Data Masking
+### 4. No-Data Masking
 ```python
 import xarray as xr
 import rasterio
@@ -144,7 +144,7 @@ from cloud_masking import mask_clouds_S2
 output_s2 = mask_clouds_S2("sentinel2_image.tif", method='auto', mask_shadows=True)
 ```
 
-## mask_clouds_landsat
+#### mask_clouds_landsat
 
 **Description**:  
 Masks clouds and optionally shadows in a Landsat raster image using various methods.
