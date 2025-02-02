@@ -92,7 +92,7 @@ minmax_scaled = Min_Max_Scaling(data)
 - data: GeoPandas GeoDataFrames (vector), Rasterio DatasetReaders (raster) or Xarray DataArrays with rio accessor (raster)
 
 **Returns**:
--pyproj.CRS: Coordinate reference system or None if undefined
+- pyproj.CRS: Coordinate reference system or None if undefined
 
 #### `compare_crs`
 **Description**: Compare CRS between raster and vector datasets.
@@ -131,7 +131,7 @@ print(compare_crs(raster, vector))  # CRS comparison results
 - target_crs: CRS to reproject to (EPSG code/WKT/proj4 string)
 
 **Returns**:
--Reprojected data in format matching input type
+- Reprojected data in format matching input type
 
 #### Example:
 ```python
