@@ -1,4 +1,8 @@
 # GeoPre: Geospatial Data Processing Toolkit  
+[![PyPI version](https://img.shields.io/pypi/v/geopre.svg)](https://pypi.org/project/geopre/)
+[![License](https://img.shields.io/github/license/MatteoGobbiF/GeoPre.svg)](https://github.com/MatteoGobbiF/GeoPre/blob/main/LICENSE)
+[![Python Versions](https://img.shields.io/pypi/pyversions/geopre.svg)](https://pypi.org/project/geopre/)
+
 **GeoPre** is a Python library designed to streamline common geospatial data operations, offering a unified interface for handling raster and vector datasets. It simplifies preprocessing tasks essential for GIS analysis, machine learning workflows, and remote sensing applications.
 
 
@@ -46,7 +50,7 @@ Ideal for researchers and developers working with geospatial data, **GeoPre** en
 
 
 ## Installation
-Install the package by running the following command:
+GeoPre is available on [PyPI](https://pypi.org/project/geopre/) and can be installed with:
 ```bash
 pip install geopre
 ```
@@ -192,7 +196,7 @@ masked_da = gp.mask_raster_data(da)
 - `output_path` *(str, optional)*: Path to save the masked output raster. Defaults to the same directory as the input with '_masked' appended to the filename.
 - `method` *(str, optional)*: The method for masking. Options are:
   - `'auto'`: Automatically chooses the best available method.
-  - `'qa'`: Uses the QA60 band to mask clouds. WARNING: QA60 is deprecated after 2022-01-25, results for images after that date could be wrong
+  - `'qa'`: Uses the QA60 band to mask clouds. WARNING: QA60 is masked between 2022-01-25 and 2024-02-28. Results for images in that date range could be wrong
   - `'probability'`: Uses the cloud probability band MSK_CLDPRB with a threshold for masking.
   - `'omnicloudmask'`: Utilizes OmniCloudMask for AI-based cloud detection. Might take a long time for big images
   - `'scl'`: Leverages the Scene Classification Layer (SCL) for masking.
@@ -279,8 +283,8 @@ stacked_image = gp.stack_bands("/path/to/folder/containing/bands", ["B4", "B3", 
 
 We provide two example Jupyter notebooks demonstrating the usage of **GeoPre**:
 
-- **[example_usage.ipynb](example_usage.ipynb)** – Demonstrates **scaling, reprojecting, and masking operations**.
-- **[example_usage_2.ipynb](example_usage_2.ipynb)** – Covers **cloud masking and band stacking**.
+- **[example_usage.ipynb](Example_Usage/example_usage.ipynb)** – Demonstrates **scaling, reprojecting, and masking operations**.
+- **[example_usage_2.ipynb](Example_Usage/example_usage_2.ipynb)** – Covers **cloud masking and band stacking**.
 
 ## Contributing
 
@@ -304,7 +308,9 @@ We provide two example Jupyter notebooks demonstrating the usage of **GeoPre**:
    
    Navigate to the Pull Requests tab in the original repository and click "New Pull Request" to submit your changes.
 
-   
+## Changelog
+**See the full release notes in the [CHANGELOG.md](CHANGELOG.md).**  
+
 ## License
 This project is licensed under the MIT License. See LICENSE for more information.
 
