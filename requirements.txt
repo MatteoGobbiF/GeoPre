@@ -1,0 +1,10 @@
+omnicloudmask
+numpy
+rasterio
+geopandas
+pyproj
+rioxarray
+xarray
+shapely
+pathlib
+typing
