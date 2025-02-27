@@ -1,7 +1,6 @@
 import numpy as np
 import rasterio as rio
 from pathlib import Path
-from rasterio.profiles import DefaultGTiffProfile
 from typing import Union, List
 
 def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_path: Union[Path, str] = None, resolution: float = None) -> str:
@@ -30,16 +29,11 @@ def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_
     
     # Iterate through the required bands and search for corresponding files
     for band_name in required_bands:
-        try:
-            # Look for files matching the band name (TIF or JP2 format)
-            band_files[band_name] = list(input_path.rglob(f"*{band_name}*.TIF")) or list(input_path.rglob(f"*{band_name}*.jp2"))
-            
-            # If a file is found, store the first match
-            if band_files[band_name]:
-                band_files[band_name] = band_files[band_name][0]
-            else:
-                raise IndexError  # Raise an exception if no file is found
-        except IndexError:
+        band_list = list(input_path.rglob(f"*{band_name}*")) or list(input_path.rglob(f"*{band_name}*.jp2"))
+        
+        if band_list:  # Only store if a file is found
+            band_files[band_name] = band_list[0]  # Take the first match
+        else:
             print(f"Warning: Band {band_name} not found in {input_path}, skipping.")
     
     # Ensure at least one valid band was found
@@ -56,13 +50,12 @@ def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_
         with rio.open(band_path) as src:
             if profile is None:
                 profile = src.profile  # Store the first raster's metadata
-            
             crs_set.add(src.crs)  # Store CRS
             resolutions.add((src.res[0], src.res[1]))  # Store resolution
             dtypes.add(src.dtypes[0])  # Store data type
             
             # Determine the native resolution of the raster
-            native_resolution = int(src.res[0])
+            native_resolution = src.res[0]
             
             # If no resolution is specified, use the highest resolution available
             if resolution is None:
@@ -70,7 +63,9 @@ def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_
             
             # Compute resampling scale factor
             scale_factor = native_resolution / resolution
-            
+            # Ensure scale_factor never results in zero-sized dimensions
+            new_height = max(1, int(src.height * scale_factor))
+            new_width = max(1, int(src.width * scale_factor))
             # Handle multi-band files correctly
             if src.count > 1:
                 # Retrieve band descriptions or generate default names
@@ -84,10 +79,7 @@ def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_
                         data.append(
                             src.read(
                                 i,
-                                out_shape=(
-                                    int(src.height * scale_factor),
-                                    int(src.width * scale_factor),
-                                ),
+                                out_shape=(new_height, new_width)
                             )
                         )
                     found_bands.append(existing_band_descriptions[i-1])  # Store band names
@@ -117,7 +109,7 @@ def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_
     
     # Convert data to a NumPy array for easier manipulation
     data = np.array(data)
-    
+
     # Update the transform (spatial reference and resolution)
     profile["transform"] = rio.transform.from_origin(
         profile["transform"][2],
@@ -134,7 +126,7 @@ def stack_bands(input_path: Union[Path, str], required_bands: List[str], output_
         width=data.shape[2],  # Image width
         driver="GTiff",  # Output format (GeoTIFF)
     )
-    
+
     # Write the stacked raster to the output file
     with rio.open(output_path, "w", **profile) as dst:
         for i in range(data.shape[0]):  # Iterate through bands
