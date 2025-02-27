@@ -134,7 +134,7 @@ def mask_clouds_S2(image_path, output_path=None, method='auto', mask_shadows=Fal
                 else:
                     print("SCL band not found!")
 
-            if method in ('qa', 'standard'):
+            if method in ('qa', 'standard', 'auto'):
                 print("Trying with quality band (QA60)")
                 qa60 = None
                 # Check for QA60 band
@@ -153,7 +153,7 @@ def mask_clouds_S2(image_path, output_path=None, method='auto', mask_shadows=Fal
                     if mask_shadows:
                         print("Warning: QA60 does not support shadow masking. Proceeding with cloud masking only.")
                     print("QA60 band found. Using it for cloud masking.")
-                    print("Warning: QA60 is deprecated after 2022-01-25, results for images after that date could be wrong")
+                    print("Warning: QA60 is masked between 2022-01-25 and 2024-02-28, results for images in that date range could be wrong")
                     
                     # Define cloud and cirrus bit positions
                     CLOUD_BIT = 10
