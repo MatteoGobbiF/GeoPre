@@ -7,3 +7,20 @@ env/
 __pycache__/
 *.pyc
 *.pyo
+
+# Ignore build artifacts (dist, build, egg-info)
+dist/
+build/
+*.egg-info/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Ignore system files
+.DS_Store
+Thumbs.db

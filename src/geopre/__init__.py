@@ -20,3 +20,5 @@ __all__ = [
     "mask_raster_data",
     "stack_bands",
 ]
+
+__version__ = "0.2.0"
