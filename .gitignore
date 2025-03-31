@@ -24,3 +24,6 @@ build/
 # Ignore system files
 .DS_Store
 Thumbs.db
+
+# Ignore testing notebooks
+testing_notebooks/*.ipynb
