@@ -28,6 +28,10 @@
   - Supports multiple methods: QA bands, scene classification layers (SCL), probability bands, and OmniCloudMask AI-based detection.  
   - Optionally mask cloud shadows for improved accuracy.  
 
+- **Water Masking** (NEW in v0.3.0):  
+  - Mask water bodies in Sentinel-2 and Landsat imagery using the NDWI index.  
+  - Tries to automatically detects relevant bands (Green/NIR). 
+
 - **Band Stacking**:  
   - Stack multiple raster bands from a folder into a single multi-band raster for analysis.  
   - Supports automatic band detection and resampling for different resolutions.  
@@ -254,7 +258,55 @@ import geopre as gp
 output_landsat = gp.mask_clouds_landsat("landsat_image.tif", method='auto', mask_shadows=True)
 ```
 
-## 6. Band Stacking
+## 6. Water Masking
+
+### `mask_water_S2`
+
+**Description**:  
+Masks water areas in Sentinel-2 imagery using the NDWI (Normalized Difference Water Index). Automatically detects Green and NIR bands based on band descriptions (e.g., B3, B8).
+
+**Parameters**:
+- `image_path` *(str)*: Path to the input raster image.
+- `output_path` *(str, optional)*: Output path. If not specified, adds `_water_masked` suffix.
+- `ndwi_threshold` *(float, optional)*: Threshold for NDWI. Default is 0.01.
+- `nodata_value` *(float, optional)*: Value for masked (non-water) pixels. Default is `np.nan`.
+- `green_idx`, `nir_idx` *(int, optional)*: Index of Green/NIR bands (1-based). Auto-detected if not provided.
+- `green_path`, `nir_path` *(str, optional)*: If bands are stored in separate files.
+
+**Returns**:
+- *(str)*: Path to the saved water-masked output raster.
+
+#### Example:
+```python
+import geopre as gp
+
+masked_s2 = gp.mask_water_S2("sentinel_image.tif", ndwi_threshold=0.05)
+```
+
+### `mask_water_landsat`
+
+**Description**:  
+Same functionality as `mask_water_S2`, adapted for Landsat band naming (e.g., B3, B5, SR_B3, SR_B5).
+
+**Parameters**:
+- `image_path` *(str)*: Path to the input raster image.
+- `output_path` *(str, optional)*: Output path. If not specified, adds `_water_masked` suffix.
+- `ndwi_threshold` *(float, optional)*: Threshold for NDWI. Default is 0.01.
+- `nodata_value` *(float, optional)*: Value for masked (non-water) pixels. Default is `np.nan`.
+- `green_idx`, `nir_idx` *(int, optional)*: Index of Green/NIR bands (1-based). Auto-detected if not provided.
+- `green_path`, `nir_path` *(str, optional)*: If bands are stored in separate files.
+
+**Returns**:
+- *(str)*: Path to the saved water-masked output raster.
+
+#### Example:
+```python
+import geopre as gp
+
+masked_landsat = gp.mask_water_landsat("landsat_image.tif", ndwi_threshold=0.05)
+```
+
+## 7. Band Stacking
 
 ### `stack_bands`
 
@@ -284,7 +336,7 @@ stacked_image = gp.stack_bands("/path/to/folder/containing/bands", ["B4", "B3", 
 We provide two example Jupyter notebooks demonstrating the usage of **GeoPre**:
 
 - **[example_usage.ipynb](Example_Usage/example_usage.ipynb)** – Demonstrates **scaling, reprojecting, and masking operations**.
-- **[example_usage_2.ipynb](Example_Usage/example_usage_2.ipynb)** – Covers **cloud masking and band stacking**.
+- **[example_usage_2.ipynb](Example_Usage/example_usage_2.ipynb)** – Covers **cloud masking, water masking and band stacking**.
 
 ## Contributing
 
